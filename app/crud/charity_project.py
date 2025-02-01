@@ -1,6 +1,6 @@
 from typing import Optional
 
-from sqlalchemy import select, extract, text
+from sqlalchemy import func, select, true
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDDonationAndProject
@@ -13,18 +13,43 @@ class CharityProjectCRUD(CRUDDonationAndProject):
     async def get_projects_by_completion_rate(
         session: AsyncSession
     ) -> list[CharityProject]:
-        projects = await session.scalars(
+        projects = await session.execute(
             select(
                 CharityProject.name,
-                extract(
-                    text('DAY_SECOND'),
-                    CharityProject.close_date -
-                    CharityProject.create_date
+                (
+                    func.printf(
+                        "%d days, %02d:%02d:%02d.%d",
+                        (
+                            func.julianday(CharityProject.close_date) -
+                            func.julianday(CharityProject.create_date)
+                        ),  # дни с дробной частью
+                        (
+                            func.julianday(CharityProject.close_date) -
+                            func.julianday(CharityProject.create_date)
+                        ) * 24 % 24,  # часы
+                        (
+                            func.julianday(CharityProject.close_date) -
+                            func.julianday(CharityProject.create_date)
+                        ) * 1440 % 60,  # минуты
+                        (
+                            func.julianday(CharityProject.close_date) -
+                            func.julianday(CharityProject.create_date)
+                        ) * 86400 % 60,  # секунды
+                        (
+                            func.julianday(CharityProject.close_date) -
+                            func.julianday(CharityProject.create_date)
+                        ) * 86400000 % 1000  # милисекунды
+                    )
                 ).label('time'),
                 CharityProject.description
             ).where(
-                CharityProject.fully_invested == 1
-            ).order_by('time')
+                CharityProject.fully_invested == true()
+            ).order_by(
+                (
+                    func.strftime('%s', CharityProject.close_date) -
+                    func.strftime('%s', CharityProject.create_date)
+                )
+            )
         )
         return projects.all()
 
