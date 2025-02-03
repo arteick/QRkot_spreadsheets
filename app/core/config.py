@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     type: Optional[str] = None
     project_id: Optional[str] = None
     private_key_id: Optional[str] = None
-    private_key: str = ''.replace('\\n', '\n')
+    private_key: str = ''
     client_email: Optional[str] = None
     client_id: Optional[str] = None
     auth_uri: Optional[str] = None
@@ -28,3 +28,4 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
+print(settings.private_key)

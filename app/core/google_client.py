@@ -1,8 +1,8 @@
 from aiogoogle import Aiogoogle
 from aiogoogle.auth.creds import ServiceAccountCreds
 from app.core.config import settings
+from app.core.constants import SCOPES
 
-SCOPES = settings.scopes.split()
 INFO = {
     'type': settings.type,
     'project_id': settings.project_id,
