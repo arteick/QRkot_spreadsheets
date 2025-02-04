@@ -20,6 +20,10 @@ async def create_closed_projects_report(
     session: AsyncSession = Depends(get_async_session),
     wrapper_services: Aiogoogle = Depends(get_service)
 ) -> str:
+    """
+    Только для суперпользователей.
+    Создаёт отчёт в Google Sheets по закрытым проектам.
+    """
     projects = await charity_project_crud.get_projects_by_completion_rate(
         session=session
     )
